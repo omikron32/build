@@ -1,0 +1,1 @@
+{"version":3,"sources":["components/_index.scss"],"names":[],"mappings":"AAAA,KACE,WAAA,KAGF,MACE,MAAA,KACA,WAAA,KACA,OAAA,KAEA,YACE,WAAA","file":"main.css","sourcesContent":["body {\r\n  background: #fff;\r\n}\r\n\r\n.menu {\r\n  width: 100%;\r\n  background: #000;\r\n  height: 70px;\r\n\r\n  &__item {\r\n    background: #ccc;\r\n  }\r\n}"]}
