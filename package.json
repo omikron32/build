@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "gulp-imagemin": "^7.1.0",
-    "gulp-smushit": "^1.2.0"
+    "gulp-smushit": "^1.2.0",
+    "gulp-svg-sprite": "^2.0.1"
   }
 }
