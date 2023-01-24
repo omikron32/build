@@ -9,7 +9,7 @@ var gulp        = require('gulp');
     svgSprite   = require('gulp-svg-sprite');
 
 gulp.task('sass', function(){
-    return gulp.src('src/style/*.scss')
+    return gulp.src('src/scss/*.scss')
         .pipe(sourcemaps.init())
         .pipe(sass())
         .pipe(prefixer(['last 4 versions']))
@@ -69,7 +69,7 @@ gulp.task('svg-sprite', function () {
 });
 
 gulp.task('watch', function() {
-    gulp.watch('src/style/**/*.scss', gulp.parallel('sass'));
+    gulp.watch('src/scss/**/*.scss', gulp.parallel('sass'));
     gulp.watch('src/*.html', gulp.parallel('html'));
     gulp.watch('src/js/*.js', gulp.parallel('js'));
     gulp.watch('src/fonts/*.*', gulp.parallel('fonts'));
