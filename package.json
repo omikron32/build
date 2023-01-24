@@ -8,5 +8,9 @@
     "gulp-sourcemaps": "^3.0.0",
     "gulp-webp": "^4.0.1",
     "sass": "^1.43.3"
+  },
+  "devDependencies": {
+    "gulp-imagemin": "^7.1.0",
+    "gulp-smushit": "^1.2.0"
   }
 }

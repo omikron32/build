@@ -5,6 +5,7 @@ var gulp        = require('gulp');
     cleancss	= require('gulp-clean-css');
     sourcemaps	= require('gulp-sourcemaps');
     webp        = require('gulp-webp');
+    imagemin    = require('gulp-imagemin');
 
 gulp.task('sass', function(){
     return gulp.src('src/style/*.scss')
@@ -24,21 +25,27 @@ gulp.task('html', function() {
 });
 
 gulp.task('images', function() {
-    return gulp.src('src/img/*.jpg')
+    return gulp.src('src/img/*.{jpg,jpeg,png,svg}')
+        .pipe(imagemin([
+            imagemin.mozjpeg({quality: 50, progressive: true}),
+            imagemin.optipng({optimizationLevel: 5}),
+        ]))
         .pipe(gulp.dest('build/img'))
         .pipe(browsersync.reload({ stream: true }))
 });
 
 gulp.task('towebp', function () {
-    return gulp.src('src/img/*.* ')
+    return gulp.src('src/img/*.{jpg,jpeg,png}')
         .pipe(webp())
         .pipe(gulp.dest('build/img'))
+        .pipe(browsersync.reload({ stream: true }))
 });
 
 gulp.task('watch', function() {
     gulp.watch('src/style/**/*.scss', gulp.parallel('sass'));
     gulp.watch('src/*.html', gulp.parallel('html'));
     gulp.watch('src/img/*.jpg', gulp.parallel('images'));
+    gulp.watch('src/img/*.jpg', gulp.parallel('towebp'));
 });
 
 gulp.task('browser-sync', function() { // Создаем таск browser-sync
