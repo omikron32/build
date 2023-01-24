@@ -50,7 +50,7 @@ gulp.task('towebp', function () {
 gulp.task('watch', function() {
     gulp.watch('src/style/**/*.scss', gulp.parallel('sass'));
     gulp.watch('src/*.html', gulp.parallel('html'));
-    gulp.watch('src/js*.js', gulp.parallel('js'));
+    gulp.watch('src/js/*.js', gulp.parallel('js'));
     gulp.watch('src/img/*.jpg', gulp.parallel('images'));
     gulp.watch('src/img/*.jpg', gulp.parallel('towebp'));
 });
