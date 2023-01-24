@@ -1,0 +1,82 @@
+@import '../rtl/f-rtl';
+@import '../rtl/m-rtl';
+@import '../media-query/include-media';
+
+/// Returns the opposite direction of each direction in a list
+/// @author Hugo Giraudel
+/// @param {List} $directions - List of initial directions
+/// @return {List} - List of opposite directions
+@function opposite-direction($directions) {
+  $opposite-directions: ();
+  $direction-map: (
+          'top': 'bottom',
+          'right': 'left',
+          'bottom': 'top',
+          'left': 'right',
+          'center': 'center',
+          'ltr': 'rtl',
+          'rtl': 'ltr'
+  );
+
+  @each $direction in $directions {
+    $direction: to-lower-case($direction);
+
+    @if map-has-key($direction-map, $direction) {
+      $opposite-directions: append($opposite-directions, unquote(map-get($direction-map, $direction)));
+    } @else {
+      @warn "No opposite direction can be found for `#{$direction}`. Direction omitted.";
+    }
+  }
+
+  @return $opposite-directions;
+}
+
+//высчитываем em
+@function em($values...) {
+  $context: strip-units(nth($values, length($values)));
+  $result: ();
+  $separator: list_separator($values);
+
+  @for $i from 1 through length($values) - 1 {
+    $value: nth($values, $i);
+    @if type-of($value) == "number" {
+      $value: strip-units($value);
+      $result: append($result, $value / $context * 1em, $separator);
+    } @else if type-of($value) == "list" {
+      $result: append($result, em(append($value, $context)...), $separator);
+    } @else {
+      $result: append($result, $value, $separator);
+    }
+  }
+
+  @return if(length($result) == 1, nth($result, 1), $result);
+}
+
+//воспомогательная функция для расчета em
+@function strip-units($number) {
+  @return $number / ($number * 0 + 1);
+}
+
+@function to-bool($value) {
+  @if ($value == '' or $value == 0 or $value == ()) {
+    @return false
+  } @else {
+    @return true
+  }
+}
+
+//Функция инкремента в отрицательную сторону
+@function increment-min($value, $min:1){
+  @return if($value != 0, $value - $min, 0);
+}
+
+//миксин для расчета координаты по спрайту
+@mixin position-sprite($countX, $countY, $positionX, $positionY) {
+  $elemX: 100/$countX;
+  $elemY: 100/$countY;
+  background-position: $elemX * $positionX * 1% $elemY * $positionY * 1%;
+}
+
+@mixin top-game-mobi-v3 {
+  top: 3rem;
+}

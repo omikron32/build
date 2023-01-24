@@ -1,0 +1,441 @@
+@import "../common/functions";
+/// Slightly lighten a color
+/// @access public
+/// @param {Color} $color - color to tint
+/// @param {Number} $percentage - percentage of `$color` in returned color
+/// @return {Color}
+@function tint($color, $percentage) {
+  @if (type_of($color) != 'color') {
+    @warn 'only color allowed'
+  }
+  @return mix(white, $color, $percentage);
+}
+
+/// Slightly darken a color
+/// @access public
+/// @param {Color} $color - color to shade
+/// @param {Number} $percentage - percentage of `$color` in returned color
+/// @return {Color}
+@function shade($color, $percentage) {
+  @if (type_of($color) != 'color') {
+    @warn 'only color allowed'
+  }
+  @return mix(black, $color, $percentage);
+}
+
+///Функция для покраски , возвращает цвет из первого параметра с настройками насыщенности и яркости цвета из второго параметра
+///@param {Color} $new - новый цвет
+///@color {Color} $old - старый цвет
+@function nc($new, $old) {
+  @if (saturation($new) <= 5 and lightness($new) < 20) {
+    @return rgba(hsl(hue($new), saturation($new), lightness($old)), alpha($old));
+  } @else {
+    @return rgba(hsl(hue($new), saturation($old), lightness($old)), alpha($old));
+  }
+}
+
+///Функция создающая палитру цветов из 1 цвета, желательно передавать цвета у которых $lightness и $saturation близки к 50
+///@param {Color} $color - цвет на основе которого генерируется палитра
+///@return {Map} - палитра с ключами из $color-steps
+@function generate-palette($color) {
+  $saturation: saturation($color);
+  $lightness: lightness($color);
+  $result: $colors-steps;
+
+  @each $name, $value in $colors-steps {
+
+    @if ($name == '500') {
+      $result: map_merge($result, ($name: $color));
+    }
+
+    @if (type_of($value) == 'list') {
+      $saturation_count: nth-value($value, 1);
+      $lightness_count: nth-value($value, 2);
+      $s: if($saturation_count > 100, 100%, $saturation_count);
+      $l: if($lightness_count > 100, 100%, $lightness_count);
+      $h: hue(mix($color, #000, 15));
+      $counted_value: hsl($hue: $h, $saturation: $s, $lightness: $l);
+      $result: map_merge($result, ($name : $counted_value));
+    } @else if ($name > 500 and $name <= 900) {
+      $counted_value: shade($color, $value);
+      $result: map_merge($result, ($name : $counted_value));
+    } @else {
+      $counted_value: tint($color, $value);
+      $result: map_merge($result, ($name : $counted_value));
+    }
+  }
+  @return $result;
+}
+
+///Функция возвращающая комплиментарный цвет. т.е. Противоположный цвет по цветовому кругу
+///@param {Color} $color - цвет.
+///@return {Color} - комплиментарный цвет
+@function compliment($color) {
+  $hue: (hue($color) + 180) % 360;
+  @return adjust_hue($color, $hue);
+}
+
+///Функция возвращающая 3 цвета. (Треугольная схема)
+///@param {Color} $color - цвет.
+///@return {Color} - 3 цвета.
+///Примеры: https://color.adobe.com/ru/create/color-wheel/
+@function triad ($color) {
+  $hue: hue($color);
+  @return (
+    adjust_hue($color, $hue: ($hue + 90) % 360),
+    adjust_hue($color, $hue: ($hue + 180) % 360),
+    adjust_hue($color, $hue: ($hue + 270) % 360),
+  );
+}
+
+///Функция возвращающая цвета близкие по hue (близлежайшие цвета на цветовом круге)
+///@param {Color} $color - цвет.
+///@param {Number} $pieces - Кол-во частей.
+///@param {Number} $result-colors - Кол-во цветов на выходе.
+///@return {List} - преобразованные цвета.
+///Примеры: https://color.adobe.com/ru/create/color-wheel/ последовательная схема
+@function analogous ($color, $pieces: 30, $result-colors: 3) {
+  $result: ();
+  $hue: hue($color);
+  $part: 360 / $pieces;
+
+  @for $i from 1 through $result-colors {
+    $gen-hue: (($hue - ($part * $i)) + 720) % 360;
+    $new-color: change_color($color, $hue: $gen-hue);
+    $result: append($result, $new-color);
+  }
+
+  @return $result;
+}
+
+///Функция возвращающая 4 цвета. (Прямоугольная схема)
+///@param {Color} $color - цвет.
+///@return {Color} - цвета
+///Примеры: http://colorsupplyyy.com/app/ square
+@function tetrad ($color) {
+  $hue: hue($color);
+
+  @return (
+    $color,
+    adjust_hue($color, $hue: ($hue + 90) % 360),
+    adjust_hue($color, $hue: ($hue + 180) % 360),
+    adjust_hue($color, $hue: ($hue + 270) % 360),
+  );
+}
+
+///Функция возвращающая hue в завсимости от переданного значения.
+///@param {Color} $color - цвет.
+///@return {Color} - hue цвета
+@function spin($color, $amount) {
+  $hue: if(hue($color) < 0, 360 + hue($color), hue($color));
+  @return ($hue + $amount) % 360;
+}
+
+/// Функция которая возвращает различия двух цветов
+///@param {Color} $color-a - первый цвет
+///@param {Color} $color-b - второй цвет
+///@return {Array} Возвращает массив различий
+@function color-diff($color-a, $color-b) {
+  $hue: hue($color-a) - hue($color-b);
+  $saturation: saturation($color-a) - saturation($color-b);
+  $lightness: lightness($color-a) - lightness($color-b);
+
+  $function-hue: 'adjust-hue';
+  $function-saturation: if($saturation > 0, 'desaturate', 'saturate');
+  $function-lightness: if($lightness > 0, 'darken', 'lighten');
+
+  @return (
+    #{$function-hue}: -($hue),
+    #{$function-saturation}: abs($saturation),
+    #{$function-lightness}: abs($lightness),
+  );
+}
+
+/// Функция возвращающая яркость цвета
+///@param {Color} $color-a - первый цвет
+// Formula: http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
+@function color-luminance($color) {
+  $rgba: red($color), green($color), blue($color);
+  $rgba2: ();
+
+  @for $i from 1 through 3 {
+    $rgb: nth($rgba, $i);
+    $rgb: $rgb / 255;
+
+    $rgb: if($rgb < .03928, $rgb / 12.92, pow(($rgb + .055) / 1.055, 2.4, 16));
+
+    $rgba2: append($rgba2, $rgb);
+  }
+
+  @return .2126 * nth($rgba2, 1) + .7152 * nth($rgba2, 2) + 0.0722 * nth($rgba2, 3);
+}
+
+// Проверка 2х цветов на контарстность
+///@param {Color} $color1 - цвет
+///@param {Color} $color2 - цвет
+// Formula: http://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef
+@function color-contrast($color1, $color2) {
+
+  $luminance1: color-luminance($color1) + .05;
+  $luminance2: color-luminance($color2) + .05;
+  $ratio: $luminance1 / $luminance2;
+
+  @if $luminance2 > $luminance1 {
+    $ratio: 1 / $ratio;
+  }
+
+  $ratio: round($ratio * 10) / 10;
+
+  @return $ratio;
+}
+
+///Получение контарстного цвета относительно другого цвета (Получение цвета текста в зависимости от фона)
+///@param {Color} $color_need_adjust - цвет который необходимо преобразовать
+///@param {Color} $color2 - цвет относительно которого преобразовывать
+///@return {Color} - контрастный цвет
+@function get-contrasted-color($color_need_adjust, $color, $saturation-step: 1, $lightness-step: 1, $contrast-ratio: 7) {
+  @if (color-contrast($color_need_adjust, $color) >= $contrast-ratio) {
+    @return $color_need_adjust;
+  }
+
+  $start-color: $color_need_adjust;
+  $start-color-lightness: lightness($color_need_adjust);
+  $result: false;
+  $saturation: saturation($color_need_adjust);
+  $lightness: lightness($color_need_adjust);
+
+  @while ($result == false and ($saturation >= 0 or ($lightness >= 0 and $lightness <= 100))) {
+    $color_need_adjust: desaturate($color_need_adjust, $saturation-step);
+    $saturation: $saturation - $saturation-step;
+    @if (lightness($color) > lightness($color_need_adjust) or (lightness($color) == lightness($color_need_adjust) and lightness($color) > 50)) {
+      $lightness: $lightness - $lightness-step;
+      $color_need_adjust: darken($color_need_adjust, $lightness-step);
+    } @else {
+      $color_need_adjust: lighten($color_need_adjust, $lightness-step);
+      $lightness: $lightness + $lightness-step;
+    }
+
+    $result: color-contrast($color_need_adjust, $color) >= $contrast-ratio;
+  }
+
+  @if ($result == false) {
+    @warn '#{$start-color} был преобразован в #{$color_need_adjust}, но он недостаточно контрастирует с #{$color} попробуйте выбрать другой цвет';
+  }
+
+  @return $color_need_adjust;
+}
+
+///Получение контарстного цвета белого или черного
+///@param {Color} $color - цвет относительно которого получаем контрастный цвет
+///@return {Color} - white или black
+@function get-simple-contrasted-color ($color, $contrast-ratio: 7) {
+
+  $hue: hue($color);
+  $lightness: lightness($color);
+
+  $white-contrast: color-contrast(white, $color);
+  $black-contrast: color-contrast(black, $color);
+
+  //Для зеленого и его оттенков предпочтителен зеленый
+  @if($hue >= 80deg and $hue <= 195deg and $lightness <= 50%) {
+    @return white
+  }
+
+  @if ($white-contrast >= $contrast-ratio) {
+    @return white
+  }
+
+  @return if($white-contrast - $black-contrast > 0, white, black);
+
+}
+
+///Получение контарстного цвета из палитры цветов
+///@param {Color} $color - цвет относительно которого получаем контрастный цвет
+///@param {Map} $palette - палитра в которой ищем контрастный цвет
+///@param {Boolean} $accent - ищет только по акцентным цветам
+///@return {Color} - контрастный цвет или black или white
+@function get-palette-contrasted-color ($color, $palette: $palette, $contrast-ratio: 7, $accent: false) {
+
+  $result: false;
+
+  @if $palette {
+    @if ($accent) {
+      @each $value in $palette {
+        @if (str_index(inspect(nth-value($value, 1)), 'A') == 1) {
+          $result: color-contrast($color, nth-value($value, 2)) >= $contrast-ratio ;
+        }
+        @if $result {
+          @return nth-value($value, 2);
+        }
+      }
+    } @else {
+      @each $value in $palette {
+        $result: color-contrast($color, nth-value($value, 2)) >= $contrast-ratio ;
+        @if $result {
+          @return nth-value($value, 2);
+        }
+      }
+    }
+  }
+
+  @if ($result == false) {
+    @return get-simple-contrasted-color($color)
+  }
+
+  @return $color;
+}
+
+///Получение контарстного цвета из списка цветов
+///@param {Color} $base - цвет относительно которого преобразовывать
+///@param {List} $colors - цвета из которых выбираем наиболее контрастный
+///@param {Number} $contrast-ratio - константа стандарта 4.5 - AA, 7 - AAA; AAA - отличный контараст цветов, АА - допустимый контраст, рекомендуемый для заглавный букв и заголовков
+///@return {Color} - контрастный цвет
+@function get-contrasted-color-in-list($base, $colors: (#fff, #000), $contrast-ratio: 4.5 ,$tolerance: 0) {
+  $best: nth($colors, 1);
+  $contrast: color-contrast($base, $best);
+
+  @for $i from 2 through length($colors) {
+    $currentColor: nth($colors, $i);
+    $currentContrast: color-contrast($base, $currentColor);
+    @if ($currentContrast - $contrast > $tolerance) {
+      $best: $currentColor;
+      $contrast: $currentContrast;
+    }
+  }
+
+  @if ($contrast < $contrast-ratio) {
+    @warn "Contrast ratio of #{$best} on #{$base} is pretty bad, just #{$contrast}";
+  }
+
+  @return $best;
+}
+
+///Функция умнажающая один цвет на другой
+///@param {Color} - $color-1 - цвет
+///@param {Color} - $color-2 - цвет
+///@return {Color} - палитра с ключами из $color-steps
+@function multiply-colors ($color-1, $color-2) {
+  $red: red($color-1) * red($color-2) / 255;
+  $green: green($color-1) * green($color-2) / 255;
+  $blue: blue($color-1) * blue($color-2) / 255;
+
+  @return rgb($red, $green, $blue);
+}
+
+///Функция создающая палитру цветов из 1 цвета, желательно передавать цвета у которых $lightness и $saturation близки к 50
+///@param {Color} $color - цвет на основе которого генерируется палитра
+///@return {Map} - палитра с ключами из $color-steps
+@function generate-palette($color) {
+  $saturation: saturation($color);
+  $lightness: lightness($color);
+  $dark: multiply-colors($color, $color);
+  $result: $colors-steps;
+
+  @each $name, $value in $colors-steps {
+
+    @if ($name == '500') {
+      $result: map_merge($result, ($name: $color));
+    }
+
+    @if ($name > 500 and $name <= 900) {
+      $counted_value: mix($dark, $color, $value);
+      $result: map_merge($result, ($name : $counted_value));
+    } @else {
+      $counted_value: tint($color, $value);
+      $result: map_merge($result, ($name : $counted_value));
+    }
+  }
+
+  @each $name, $value in $accent-color-steps {
+    $saturation_count: nth-value($value, 1);
+    $lightness_count: nth-value($value, 2);
+    $s: if($saturation_count > 100, 100%, $saturation_count);
+    $l: if($lightness_count > 100, 100%, $lightness_count);
+    $h: hue($color);
+    $h: hue($color);
+    $counted_value: hsl($hue: $h, $saturation: $s, $lightness: $l);
+    $result: map_merge($result, ($name : $counted_value));
+  }
+  @return $result;
+}
+
+/// mpc - main-palette-color
+///Функция возвращающая цвет из основной палитры по его ключу
+///@param {String} $name - цвет на основе которого генерируется палитра
+///@return {Map} $palette - палитра из которой выбирают
+@function mpc($name, $palette: $palette) {
+  @return map_get($palette, $name);
+}
+
+/// apc - accent-palette-color
+///Функция возвращающая цвет акцентной палитры по его ключу
+///@param {String} $name - цвет на основе которого генерируется палитра
+///@return {Map} $palette - палитра из которой выбирают
+@function apc($name, $palette: $accent-palette) {
+  @return map_get($palette, $name);
+}
+
+///Функция возвращающая комплиментарный цвет. т.е. Противоположный цвет по цветовому кругу
+///@param {Color} $color - цвет.
+///@return {Color} - комплиментарный цвет
+@function compliment($color) {
+  $hue: (hue($color) + 180) % 360;
+  @return adjust_hue($color, $hue);
+}
+
+///Функция возвращающая 3 цвета. (Треугольная схема)
+///@param {Color} $color - цвет.
+///@return {Color} - 3 цвета.
+///Примеры: https://color.adobe.com/ru/create/color-wheel/
+@function triad ($color) {
+  $hue: hue($color);
+  @return (
+    adjust_hue($color, $hue: ($hue + 90) % 360),
+    adjust_hue($color, $hue: ($hue + 180) % 360),
+    adjust_hue($color, $hue: ($hue + 270) % 360),
+  );
+}
+
+///Функция возвращающая цвета близкие по hue (близлежайшие цвета на цветовом круге)
+///@param {Color} $color - цвет.
+///@param {Number} $pieces - Кол-во частей.
+///@param {Number} $result-colors - Кол-во цветов на выходе.
+///@return {List} - преобразованные цвета.
+///Примеры: https://color.adobe.com/ru/create/color-wheel/ последовательная схема
+@function analogous ($color, $pieces: 30, $result-colors: 3) {
+  $result: ();
+  $hue: hue($color);
+  $part: 360 / $pieces;
+
+  @for $i from 1 through $result-colors {
+    $gen-hue: (($hue - ($part * $i)) + 720) % 360;
+    $new-color: change_color($color, $hue: $gen-hue);
+    $result: append($result, $new-color);
+  }
+
+  @return $result;
+}
+
+///Функция возвращающая 4 цвета. (Прямоугольная схема)
+///@param {Color} $color - цвет.
+///@return {Color} - цвета
+///Примеры: http://colorsupplyyy.com/app/ square
+@function tetrad ($color) {
+  $hue: hue($color);
+
+  @return (
+    $color,
+    adjust_hue($color, $hue: ($hue + 90) % 360),
+    adjust_hue($color, $hue: ($hue + 180) % 360),
+    adjust_hue($color, $hue: ($hue + 270) % 360),
+  );
+}
+
+///Функция возвращающая hue в завсимости от переданного значения.
+///@param {Color} $color - цвет.
+///@return {Color} - hue цвета
+@function spin($color, $amount) {
+  $hue: if(hue($color) < 0, 360 + hue($color), hue($color));
+  @return ($hue + $amount) % 360;
+}
+

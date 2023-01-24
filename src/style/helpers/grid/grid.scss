@@ -1,0 +1,106 @@
+@import "variables";
+@import "mixins";
+
+.#{$grid-scope-class} {
+  @include make-grid();
+
+  &__inner {
+    @include make-grid-inner();
+  }
+
+  &__cell {
+
+    @include make-grid-cell();
+
+    @for $span from 1 through $grid-default-size {
+      &--span-#{$span} {
+        @include make-grid-cell-span_($span: $span);
+      }
+    }
+
+    // Order override classes.
+    @for $i from 1 through $grid-default-size {
+      &--order-#{$i} {
+        @include set-grid-cell-order($i);
+      }
+    }
+
+    @if $default-grid-conditions {
+      @each $key, $value in $default-grid-conditions {
+        @for $span from 1 through $grid-default-size {
+          @if ($conditions-breakpoints and map_get($conditions-breakpoints, $key)) {
+            @include media('screen', map_get($conditions-breakpoints, $key)) {
+              .#{$override-selector}.#{$value} &--span-#{$key}-#{$span} {
+                @include make-grid-cell-span_($span: $span);
+              }
+            }
+          } @else {
+            .#{$override-selector}.#{$value} &--span-#{$key}-#{$span} {
+              @include make-grid-cell-span_($span: $span);
+            }
+          }
+        }
+      }
+    }
+
+    // Order override classes.
+    @for $i from 1 through $grid-default-size {
+      &--order-#{$i} {
+        @include set-grid-cell-order($i);
+      }
+    }
+
+    @if $default-grid-conditions {
+      @each $key, $value in $default-grid-conditions {
+        // Order override classes.
+        @for $i from 1 through $grid-default-size {
+          #{$override-selector}.#{$value} &--order-#{$key}-#{$i} {
+            @include set-grid-cell-order($i);
+          }
+        }
+      }
+    }
+
+    // Alignment classes.
+    &--align-top {
+      @include set-grid-cell-align(top);
+    }
+
+    &--align-middle {
+      @include set-grid-cell-align(middle);
+    }
+
+    &--align-bottom {
+      @include set-grid-cell-align(bottom);
+    }
+
+    &--static {
+      flex: 0 0 auto;
+      width: auto;
+      @supports (display: grid) {
+        grid-column-end: auto;
+      }
+    }
+
+    &--growing {
+      flex: 1 1 auto;
+      @supports (display: grid) {
+        grid-column-end: auto;
+      }
+    }
+  }
+
+  &--fixed-column-width {
+    @include set-grid-fixed-column-width();
+  }
+
+  &--align-left {
+    margin-right: auto;
+    margin-left: 0;
+  }
+
+  &--align-right {
+    margin-right: 0;
+    margin-left: auto;
+  }
+}

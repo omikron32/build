@@ -1,0 +1,20 @@
+$rules: (
+  margin: m,
+  padding: p,
+  border: b
+);
+
+$direction: (
+  left: l,
+  right: r,
+  top: t,
+  bottom: b,
+  vertical: v,
+  horizontal: h
+);
+
+$direction-row : (
+  start: s,
+  center: c,
+  end: e
+)

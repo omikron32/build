@@ -1,0 +1,162 @@
+@each $key-rule, $item-rule in $rules {
+  @each $key-dir, $item-dir in $direction {
+    @if ($key-dir == 'horizontal') {
+      .u-n#{$item-rule}#{$item-dir} {
+        #{$key-rule}-#{dir()}: 0 !important;
+        #{$key-rule}-#{dir(right)}: 0 !important;
+      }
+    } @else if ($key-dir == 'vertical') {
+      .u-n#{$item-rule}#{$item-dir} {
+        #{$key-rule}-top: 0 !important;
+        #{$key-rule}-bottom: 0 !important;
+      }
+    } @else {
+      .u-n#{$item-rule}#{$item-dir} {
+        #{$key-rule}-#{$key-dir}: 0 !important;
+      }
+    }
+  }
+  .u-n#{$item-rule} {
+    #{$key-rule}: 0 !important;
+  }
+}
+
+
+.u-mla {
+  margin-#{dir()}: auto !important;
+}
+
+.u-mra {
+  margin-#{dir(right)}: auto !important;
+}
+
+.u-tar {
+  text-align: #{dir(right)} !important;
+}
+
+.u-tac {
+  text-align: center !important;
+}
+
+.u-jcc {
+  justify-content: center !important;
+}
+
+.u-f-alc {
+  align-items: center !important;
+}
+
+.u-f-row {
+  flex-direction: row;
+  @include dir-content {
+    flex-direction: row-reverse !important;
+  }
+}
+
+.u-f-row-r {
+  flex-direction: row-reverse;
+}
+
+.u-jcfs {
+  justify-content: flex-start !important;
+  @include dir-content {
+    flex-direction: flex-end !important;
+  }
+}
+
+.u-jce {
+  justify-content: flex-end !important;
+  @include dir-content {
+    flex-direction: flex-start !important;
+  }
+}
+
+.u-no-grow {
+  flex-grow: 0 !important;
+}
+
+.u-flex {
+  display: flex !important;
+}
+
+.u-flex-jc-sb {
+  justify-content: space-between !important;
+}
+
+.u-f-basis-auto {
+  flex-basis: auto !important;
+}
+
+.u-f-nowrap {
+  flex-wrap: nowrap !important;
+}
+
+.u-f-static {
+  flex: 0 0 auto !important;
+}
+
+
+.u-npd {
+  padding: 0 !important;
+}
+
+.u-nvpd {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.u-nhpd {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.u-nlpd {
+  padding-#{dir()}: 0 !important;
+}
+
+.u-upcase {
+  text-transform: uppercase !important;
+}
+
+.u-ovh {
+  overflow: hidden;
+}
+
+.u-grow {
+  flex-grow: 1 !important;
+}
+
+.u-shrink {
+  flex-shrink: 1 !important;
+}
+
+.u-nbr {
+  border-right: 0 !important;
+}
+
+.u-dir-ltr {
+  direction: ltr !important;
+}
+
+.u-fw-500 {
+  font-weight: 500 !important;
+}
+
+.u-fw-700 {
+  font-weight: 700 !important;
+}
+
+.u-visually-hidden {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.u-lower-z-index {
+  z-index: 999!important;
+}

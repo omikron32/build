@@ -1,0 +1,56 @@
+$devices: (
+  'iphone4': 'only screen and (min-device-width: 320px) and (max-device-width: 480px) and (device-aspect-ratio: 2 / 3) and (-webkit-device-pixel-ratio: 2)',
+  'iphone4-landscape': 'only screen and (min-device-width: 320px) and (max-device-width: 480px) and (orientation: landscape) and (device-aspect-ratio: 2 / 3) and (-webkit-device-pixel-ratio: 2)',
+  'iphone4-portrait': 'only screen and (min-device-width: 320px) and (max-device-width: 480px) and (orientation: portrait) and (device-aspect-ratio: 2 / 3) and (-webkit-device-pixel-ratio: 2)',
+  'iphone5': 'only screen and (min-device-width: 320px) and (max-device-width: 568px) and (device-aspect-ratio: 40 / 71) and (-webkit-device-pixel-ratio: 2)',
+  'iphone5-landscape': 'only screen and (min-device-width: 320px) and (max-device-width: 568px) and (orientation: landscape) and (device-aspect-ratio: 40 / 71) and (-webkit-device-pixel-ratio: 2)',
+  'iphone5-portrait': 'only screen and (min-device-width: 320px) and (max-device-width: 568px) and (orientation: portrait) and (device-aspect-ratio: 40 / 71) and (-webkit-device-pixel-ratio: 2)',
+  'iphone6': 'only screen and (-webkit-device-pixel-ratio: 2) and (max-device-width: 667px) and (min-device-width: 375px)',
+  'iphone6-landscape': 'only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) and (-webkit-device-pixel-ratio: 2)',
+  'iphone6-portrait': 'only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) and (-webkit-device-pixel-ratio: 2)',
+  'iphone6plus': 'only screen and (min-device-width: 414px) and (max-device-width: 736px) and (-webkit-device-pixel-ratio: 3)',
+  'iphone6plus-landscape': 'only screen and (min-device-width: 414px) and (max-device-width: 736px) and (orientation: landscape) and (-webkit-device-pixel-ratio: 3)',
+  'iphone6plus-portrait': 'only screen and (min-device-width: 414px) and (max-device-width: 736px) and (orientation: portrait) and (-webkit-device-pixel-ratio: 3)',
+  
+  'ipad': 'only screen and (min-device-width: 768px) and (max-device-width: 1024px)',
+  'ipad-landscape': 'only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape)',
+  'ipad-portrait': 'only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait)',
+  'ipadRetina': 'only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (-webkit-device-pixel-ratio: 2)',
+  'ipadRetina-landscape': 'only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) and (-webkit-device-pixel-ratio: 2)',
+  'ipadRetina-portrait': 'only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) and (-webkit-device-pixel-ratio: 2)',
+);
+
+
+$breakpoints: (
+  '4k': 3840px,
+  '2k': 2560px,
+  'FullHD': 1920px,
+  'HD+': 1680px,
+  'laptop-large': 1600px,
+  'laptop-md': 1440px,
+  'laptop': 1366px,
+  'HD': 1280px,
+  'laptop-small': 1200px,
+  'old': 1024px
+) !default;
+
+///
+/// Creates a list of static expressions or media types
+///
+/// @example scss - Creates a single media type (screen)
+///  $media-expressions: ('screen': 'screen');
+///
+/// @example scss - Creates a static expression with logical disjunction (OR operator)
+///  $media-expressions: (
+///    'retina2x': '(-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi)'
+///  );
+///
+$media-expressions: (
+  'screen': 'screen',
+  'print': 'print',
+  'handheld': 'handheld',
+  'landscape': '(orientation: landscape)',
+  'portrait': '(orientation: portrait)',
+  'retina2x': '(-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi), (min-resolution: 2dppx)',
+  'retina3x': '(-webkit-min-device-pixel-ratio: 3), (min-resolution: 350dpi), (min-resolution: 3dppx)'
+) !default;

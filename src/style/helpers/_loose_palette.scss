@@ -1,0 +1,63 @@
+$colors-default: (
+        primary:        (color: #02569a),
+        secondary:      (color: #92c735),
+        text:           (color: #d1dfef),
+);
+
+$colors-22bet: (
+        primary:        (color: hsl(185, 82%, 23%)),
+        secondary:      (color: hsl(138, 59%, 44%)),
+        text:           (color: hsl(3, 85%, 60%)),
+);
+
+// Возвращает различия двух цветов
+// @param {color} $color-instance - измеряемый цвет
+// @param {color} $color-base - соответствующий цвет в палитре
+// @return {array} Возвращает массив различий
+@function color-diff($color-instance, $color-base) {
+  $hue: hue($color-base) - hue($color-instance);
+  $saturation: saturation($color-base) - saturation($color-instance);
+  $lightness: lightness($color-base) - lightness($color-instance);
+
+  $function-hue: 'adjust-hue';
+  $function-saturation: if($saturation > 0, 'desaturate', 'saturate');
+  $function-lightness: if($lightness > 0, 'darken', 'lighten');
+
+  @return (
+          #{$function-hue}: - ($hue),
+          #{$function-saturation}: abs($saturation),
+          #{$function-lightness}: abs($lightness),
+  );
+}
+
+// Возвращает нужный цвет из данных полученных функцией color-diff
+// @param {color} $color - цвет для трансформации
+// @param {map} $diff: массив полученных значений из color-diff
+// @return (color) - Возвращает нужный цвет
+@function apply-diff($color, $diff) {
+  @each $key, $value in $diff {
+    $color: call(get-function($key), $color, $value);
+  }
+  @return $color;
+}
+
+// Применяет разницы текущего цвета с базовым к цвету из действующей палитры
+// @param (color) $color - цвет по макету
+// @param (string) $color-base - обозначение ближайшего цвета по палитре
+// @return (color) - соответствующий цвет по действующей палитре
+@function color($color, $color-base, $domain: default) {
+
+  $base-colors: '';
+  @if ($domain == 22bet) {
+    $base-colors : $colors-22bet;
+  } @else {
+    $base-colors : $colors-default;
+  }
+  $diff : color-diff($color, map-get(map-get($base-colors, $color-base), color));
+
+  @return scale-color(
+                apply-diff(map-get(map-get($colors, $color-base), color), $diff),
+                $saturation: map-get(map-get($colors, $color-base), saturation),
+                $lightness: map-get(map-get($colors, $color-base), lightness)
+            );
+}

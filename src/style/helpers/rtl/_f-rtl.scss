@@ -1,0 +1,15 @@
+
+/// Функция возвращающая направление left или right в зависимости от $direction и $is_rtl
+/// @param {String} - $direction
+/// @param {Number} - $is_rtl
+@function dir($direction: left) {
+  @if not index(right left, $direction) {
+    @error "Direction must be either `right` or `left`.";
+  }
+  @if ($is_rtl == 0) {
+    @return $direction;
+  } @else if ($is_rtl == 1) {
+    @return opposite-direction($direction);
+  }
+}
+

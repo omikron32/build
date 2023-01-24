@@ -1,0 +1,2377 @@
+@import './functions';
+
+/*
+ Миксин соотношение сторон
+
+ Примеры:
+
+   @include aspect-ratio($ratio or $width, $height);
+
+  .class { @include aspect-ratio(); }            // без арргуменов 1:1;
+  .class { @include aspect-ratio(16, 9); }       // Ширина и длинна
+  .class { @include aspect-ratio(1.777778); }    // вычисленное значение ($width/$height)
+  .class { @include aspect-ratio(4px, 3px); }    // Одинаковые еденицы измерения
+  .class { @include aspect-ratio($ratio: 1.2); } // $ratio
+
+  source: https://codepen.io/jakob-e/pen/WvrJwN
+
+ */
+@mixin aspect-ratio($arglist... /*$ratio or $width, $height*/
+) {
+  $map: keywords($arglist);
+  $height: map-get($map, height) or nth-value($arglist, 2);
+  $width: map-get($map, width)  or nth-value($arglist, 1);
+  $ratio: map-get($map, ratio)  or if($width and $height, $width/$height, nth-value($arglist, 1)) or 1;
+  $padding: 1/$ratio * 100%;
+  &::before, &::after {
+    content: '';
+    display: table;
+    clear: both;
+    width: 1px;
+    margin-left: -1px;
+  }
+  &::before {
+    float: left;
+    padding-bottom: $padding;
+  }
+}
+
+/*
+ Миксин преобразования px в em согласно контексту
+ Примеры:
+   @include em((
+      margin: 20px 5%,
+      padding: 10px
+    ), $context); //указание контекста
+ */
+@mixin em($properties, $context : 16) {
+  @each $property in map-keys($properties) {
+    #{$property}: em(append(map-get($properties, $property), $context)...);
+  }
+}
+
+/*
+ Миксин получения значения z-index по имени
+
+ Примеры:
+  .class { z-index: z('modal-window'); }  //  =>  z-index: 6
+
+ */
+@mixin z-index($name) {
+  z-index: z-index($name);
+}
+
+/*
+ Миксин получения значения z-index по имени
+
+ Примеры:
+  .class { @include z('modal-window'); }  //  =>  z-index: 6
+ */
+@mixin z($arglist...) {
+  @include z-index($arglist...);
+}
+
+/*
+  Функция получения  vw или vh относительно px
+  @param {Number} Object число в пикселях
+  @param {Number} resolution
+ */
+@function get-viewport($object, $resolution) {
+  @if (unitless($object)) {
+    $object: $object * 1px;
+
+  } @else if (type_of($object) == 'string') {
+    @warn 'only Number format allowed'
+
+  }
+
+  $vw: ($resolution * 0.01) * 1px;
+
+  @return ($object / $vw) * 1vw;
+}
+
+/*
+  Миксин подстановки троеточия в строке если она невмещается в контейнер
+ */
+@mixin textOverflow() {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/// Triangle helper mixin
+/// @param {Direction} $direction - Triangle direction, either `top`, `right`, `bottom` or `left`
+/// @param {Color} $color [currentcolor] - Triangle color
+/// @param {Length} $size [1em] - Triangle size
+@mixin triangle($direction, $color: currentcolor, $size: 1em) {
+  @if not index(top right bottom left, $direction) {
+    @error "Direction must be either `top`, `right`, `bottom` or `left`.";
+  }
+
+  width: 0;
+  height: 0;
+  content: '';
+  z-index: 2;
+  border-#{opposite-direction($direction)}: ($size * 1.5) solid $color;
+
+  $perpendicular-borders: $size solid transparent;
+
+  @if $direction == top or $direction == bottom {
+    border-left: $perpendicular-borders;
+    border-right: $perpendicular-borders;
+  } @else if $direction == right or $direction == left {
+    border-bottom: $perpendicular-borders;
+    border-top: $perpendicular-borders;
+  }
+}
+
+
+@mixin vw($size) {
+  $vw-content: (map_get($breakpoints, 'FullHD') * .01) * 1px;
+  font-size: ($size/$vw-content) * 1vw;
+
+  @include media('>FullHD'){
+    font-size: $size;
+  }
+}
+
+@mixin placeholder {
+  &::-webkit-input-placeholder {
+    @content
+  }
+;
+  &:-moz-placeholder {
+    @content
+  }
+;
+  &::-moz-placeholder {
+    @content
+  }
+;
+  &:-ms-input-placeholder {
+    @content
+  }
+;
+}
+
+/* Input's autocomplete styles
+ -------------------------- */
+@mixin autocomplete {
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    @content
+  }
+}
+
+
+@mixin placeholder-anim-opacity {
+  &::-webkit-input-placeholder {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+  &::-moz-placeholder {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+  &:-moz-placeholder {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+  &:-ms-input-placeholder {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+  &:focus::-webkit-input-placeholder {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  &:focus::-moz-placeholder {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  &:focus:-moz-placeholder {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  &:focus:-ms-input-placeholder {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+}
+
+@mixin flags-position-counties {
+  .countryRU .itemFlag,
+  .regionRU {
+    background-position: 0 0;
+  }
+
+  .countryUA .itemFlag,
+  .regionUA {
+    background-position: 0 -11px;
+  }
+
+  .countryKZ .itemFlag,
+  .regionKZ {
+    background-position: 0 -22px;
+  }
+
+  .countryMD .itemFlag,
+  .regionMD {
+    background-position: 0 -33px;
+  }
+
+  .countryBY .itemFlag,
+  .regionBY {
+    background-position: 0 -44px;
+  }
+
+  .countryKG .itemFlag,
+  .regionKG {
+    background-position: 0 -55px;
+  }
+
+  .countryAZ .itemFlag,
+  .regionAZ {
+    background-position: 0 -66px;
+  }
+
+  .countryGE .itemFlag,
+  .regionGE {
+    background-position: 0 -77px;
+  }
+
+  .countryAM .itemFlag,
+  .regionAM {
+    background-position: 0 -88px;
+  }
+
+  .countryTJ .itemFlag,
+  .regionTJ {
+    background-position: 0 -99px;
+  }
+
+  .countryPA .itemFlag,
+  .regionPA {
+    background-position: 0 -110px;
+  }
+
+  .countryGB .itemFlag,
+  .regionGB {
+    background-position: 0 -121px;
+  }
+
+  .countryLT .itemFlag,
+  .regionLT,
+  .countryMM .itemFlag,
+  .regionMM {
+    background-position: 0 -132px;
+  }
+
+  .countryIL .itemFlag,
+  .regionIL {
+    background-position: 0 -143px;
+  }
+
+  .countryTR .itemFlag,
+  .regionTR {
+    background-position: 0 -154px;
+  }
+
+  .countryVN .itemFlag,
+  .regionVN {
+    background-position: 0 -165px;
+  }
+
+  .countryLV .itemFlag,
+  .regionLV {
+    background-position: 0 -176px;
+  }
+
+  .countryIN .itemFlag,
+  .regionIN {
+    background-position: 0 -187px;
+  }
+
+  .countryTH .itemFlag,
+  .regionTH {
+    background-position: 0 -198px;
+  }
+
+  .countryUS .itemFlag,
+  .regionUS {
+    background-position: 0 -209px;
+  }
+
+  .countryEE .itemFlag,
+  .regionEE {
+    background-position: 0 -220px;
+  }
+
+  .countryJP .itemFlag,
+  .regionJP {
+    background-position: 0 -231px;
+  }
+
+  .countryUZ .itemFlag,
+  .regionUZ {
+    background-position: 0 -242px;
+  }
+
+  .countryKR .itemFlag,
+  .regionKR {
+    background-position: 0 -253px;
+  }
+
+  .countryES .itemFlag,
+  .regionES {
+    background-position: 0 -264px;
+  }
+
+  .countryIR .itemFlag,
+  .regionIR {
+    background-position: 0 -275px;
+  }
+
+  .countryDE .itemFlag,
+  .regionDE {
+    background-position: 0 -286px;
+  }
+
+  .countryIT .itemFlag,
+  .regionIT {
+    background-position: 0 -297px;
+  }
+
+  .countryBG .itemFlag,
+  .regionBG {
+    background-position: 0 -308px;
+  }
+
+  .countryTM .itemFlag,
+  .regionTM {
+    background-position: 0 -319px;
+  }
+
+  .countryFR .itemFlag,
+  .regionFR {
+    background-position: 0 -330px;
+  }
+
+  .countrySK .itemFlag,
+  .regionSK {
+    background-position: 0 -341px;
+  }
+
+  .countryPL .itemFlag,
+  .regionPL {
+    background-position: 0 -352px;
+  }
+
+  .countryCZ .itemFlag,
+  .regionCZ {
+    background-position: 0 -363px;
+  }
+
+  .countryGR .itemFlag,
+  .regionGR {
+    background-position: 0 -374px;
+  }
+
+  .countryAU .itemFlag,
+  .regionAU {
+    background-position: 0 -385px;
+  }
+
+  .countryRO .itemFlag,
+  .regionRO {
+    background-position: 0 -396px;
+  }
+
+  .countryAB .itemFlag,
+  .regionAB {
+    background-position: 0 -407px;
+  }
+
+  .countryBM .itemFlag,
+  .regionBM {
+    background-position: 0 -418px;
+  }
+
+  .countryNO .itemFlag,
+  .regionNO {
+    background-position: 0 -430px;
+  }
+
+  .countryMN .itemFlag,
+  .regionMN {
+    background-position: 0 -442px;
+  }
+
+  .countryPT .itemFlag,
+  .regionPT {
+    background-position: 0 -455px;
+  }
+
+  .countryCN .itemFlag,
+  .regionCN {
+    background-position: 0 -467px;
+  }
+
+  .countryBR .itemFlag,
+  .regionBR {
+    background-position: 0 -479px;
+  }
+
+  .countryKE .itemFlag,
+  .regionKE {
+    background-position: 0 -489px;
+  }
+
+  .countryCM .itemFlag,
+  .regionCM {
+    background-position: 0 -500px;
+  }
+
+  .countryCY .itemFlag,
+  .regionCY {
+    background-position: 0 -511px;
+  }
+
+  .countryID .itemFlag,
+  .regionID {
+    background-position: 0 -522px;
+  }
+
+  .countryAT .itemFlag,
+  .regionAT {
+    background-position: 0 -533px;
+  }
+
+  .countryAL .itemFlag,
+  .regionAL {
+    background-position: 0 -544px;
+  }
+
+  .countryDZ .itemFlag,
+  .regionDZ {
+    background-position: 0 -555px;
+  }
+
+  .countryEN .itemFlag,
+  .regionEN {
+    background-position: 0 -566px;
+  }
+
+  .countryAO .itemFlag,
+  .regionAO {
+    background-position: 0 -577px;
+  }
+
+  .countryAD .itemFlag,
+  .regionAD {
+    background-position: 0 -588px;
+  }
+
+  .countryAG .itemFlag,
+  .regionAG {
+    background-position: 0 -599px;
+  }
+
+  .countryAR .itemFlag,
+  .regionAR {
+    background-position: 0 -610px;
+  }
+
+  .countryAW .itemFlag,
+  .regionAW {
+    background-position: 0 -621px;
+  }
+
+  .countryAF .itemFlag,
+  .regionAF {
+    background-position: 0 -632px;
+  }
+
+  .countryBS .itemFlag,
+  .regionBS {
+    background-position: 0 -643px;
+  }
+
+  .countryBD .itemFlag,
+  .regionBD {
+    background-position: 0 -654px;
+  }
+
+  .countryBB .itemFlag,
+  .regionBB {
+    background-position: 0 -665px;
+  }
+
+  .countryBH .itemFlag,
+  .regionBH {
+    background-position: 0 -676px;
+  }
+
+  .countryBZ .itemFlag,
+  .regionBZ {
+    background-position: 0 -687px;
+  }
+
+  .countryBE .itemFlag,
+  .regionBE {
+    background-position: 0 -698px;
+  }
+
+  .countryBJ .itemFlag,
+  .regionBJ {
+    background-position: 0 -709px;
+  }
+
+  .countryBO .itemFlag,
+  .regionBO {
+    background-position: 0 -720px;
+  }
+
+  .countryBA .itemFlag,
+  .regionBA {
+    background-position: 0 -731px;
+  }
+
+  .countryBW .itemFlag,
+  .regionBW {
+    background-position: 0 -742px;
+  }
+
+  .countryBN .itemFlag,
+  .regionBN {
+    background-position: 0 -753px;
+  }
+
+  .countryBF .itemFlag,
+  .regionBF {
+    background-position: 0 -764px;
+  }
+
+  .countryBI .itemFlag,
+  .regionBI {
+    background-position: 0 -775px;
+  }
+
+  .countryBT .itemFlag,
+  .regionBT {
+    background-position: 0 -786px;
+  }
+
+  .countryVU .itemFlag,
+  .regionVU {
+    background-position: 0 -797px;
+  }
+
+  .countryHU .itemFlag,
+  .regionHU {
+    background-position: 0 -808px;
+  }
+
+  .countryVE .itemFlag,
+  .regionVE {
+    background-position: 0 -819px;
+  }
+
+  .countryTL .itemFlag,
+  .regionTL {
+    background-position: 0 -830px;
+  }
+
+  .countryGA .itemFlag,
+  .regionGA {
+    background-position: 0 -841px;
+  }
+
+  .countryHT .itemFlag,
+  .regionHT {
+    background-position: 0 -852px;
+  }
+
+  .countryGY .itemFlag,
+  .regionGY {
+    background-position: 0 -863px;
+  }
+
+  .countryGM .itemFlag,
+  .regionGM {
+    background-position: 0 -874px;
+  }
+
+  .countryGH .itemFlag,
+  .regionGH {
+    background-position: 0 -885px;
+  }
+
+  .countryGP .itemFlag,
+  .regionGP {
+    background-position: 0 -896px;
+  }
+
+  .countryGT .itemFlag,
+  .regionGT {
+    background-position: 0 -907px;
+  }
+
+  .countryGN .itemFlag,
+  .regionGN {
+    background-position: 0 -918px;
+  }
+
+  .countryGW .itemFlag,
+  .regionGW {
+    background-position: 0 -929px;
+  }
+
+  .countryGI .itemFlag,
+  .regionGI {
+    background-position: 0 -940px;
+  }
+
+  .countryNL .itemFlag,
+  .regionNL {
+    background-position: 0 -951px;
+  }
+
+  .countryHN .itemFlag,
+  .regionHN {
+    background-position: 0 -962px;
+  }
+
+  .countryHK .itemFlag,
+  .regionHK {
+    background-position: 0 -973px;
+  }
+
+  .countryGD .itemFlag,
+  .regionGD {
+    background-position: 0 -984px;
+  }
+
+  .countryGL .itemFlag,
+  .regionGL {
+    background-position: 0 -995px;
+  }
+
+  .countryGU .itemFlag,
+  .regionGU {
+    background-position: 0 -1006px;
+  }
+
+  .countryDK .itemFlag,
+  .regionDK {
+    background-position: 0 -1017px;
+  }
+
+  .countryDJ .itemFlag,
+  .regionDJ {
+    background-position: 0 -1028px;
+  }
+
+  .countryDO .itemFlag,
+  .regionDO {
+    background-position: 0 -1039px;
+  }
+
+  .countryEG .itemFlag,
+  .regionEG {
+    background-position: 0 -1050px;
+  }
+
+  .countryZM .itemFlag,
+  .regionZM {
+    background-position: 0 -1061px;
+  }
+
+  .countryZA .itemFlag,
+  .regionZA {
+    background-position: 0 -2249px;
+  }
+
+  .countryEH .itemFlag,
+  .regionEH {
+    background-position: 0 -1072px;
+  }
+
+  .countryZW .itemFlag,
+  .regionZW {
+    background-position: 0 -1083px;
+  }
+
+  .countryJO .itemFlag,
+  .regionJO {
+    background-position: 0 -1094px;
+  }
+
+  .countryIQ .itemFlag,
+  .regionIQ {
+    background-position: 0 -1105px;
+  }
+
+  .countryIE .itemFlag,
+  .regionIE {
+    background-position: 0 -1116px;
+  }
+
+  .countryIS .itemFlag,
+  .regionIS {
+    background-position: 0 -1127px;
+  }
+
+  .countryYE .itemFlag,
+  .regionYE {
+    background-position: 0 -1138px;
+  }
+
+  .countryCV .itemFlag,
+  .regionCV {
+    background-position: 0 -1149px;
+  }
+
+  .countryKH .itemFlag,
+  .regionKH {
+    background-position: 0 -1160px;
+  }
+
+  .countryCA .itemFlag,
+  .regionCA {
+    background-position: 0 -1171px;
+  }
+
+  .countryQA .itemFlag,
+  .regionQA {
+    background-position: 0 -1182px;
+  }
+
+  .countryKI .itemFlag,
+  .regionKI {
+    background-position: 0 -1193px;
+  }
+
+  .countryCO .itemFlag,
+  .regionCO {
+    background-position: 0 -1204px;
+  }
+
+  .countryKM .itemFlag,
+  .regionKM {
+    background-position: 0 -1215px;
+  }
+
+  .countryCG .itemFlag,
+  .regionCG {
+    background-position: 0 -1226px;
+  }
+
+  .countryCD .itemFlag,
+  .regionCD {
+    background-position: 0 -1237px;
+  }
+
+  .countryCR .itemFlag,
+  .regionCR {
+    background-position: 0 -1248px;
+  }
+
+  .countryCI .itemFlag,
+  .regionCI {
+    background-position: 0 -1259px;
+  }
+
+  .countryCU .itemFlag,
+  .regionCU {
+    background-position: 0 -1270px;
+  }
+
+  .countryKW .itemFlag,
+  .regionKW {
+    background-position: 0 -1281px;
+  }
+
+  .countryCW .itemFlag,
+  .regionCW {
+    background-position: 0 -1292px;
+  }
+
+  .countryLA .itemFlag,
+  .regionLA {
+    background-position: 0 -1303px;
+  }
+
+  .countryLS .itemFlag,
+  .regionLS {
+    background-position: 0 -1314px;
+  }
+
+  .countryLR .itemFlag,
+  .regionLR {
+    background-position: 0 -1325px;
+  }
+
+  .countryLB .itemFlag,
+  .regionLB {
+    background-position: 0 -1336px;
+  }
+
+  .countryLY .itemFlag,
+  .regionLY {
+    background-position: 0 -1347px;
+  }
+
+  .countryLI .itemFlag,
+  .regionLI {
+    background-position: 0 -1358px;
+  }
+
+  .countryLU .itemFlag,
+  .regionLU {
+    background-position: 0 -1369px;
+  }
+
+  .countryMU .itemFlag,
+  .regionMU {
+    background-position: 0 -1380px;
+  }
+
+  .countryMR .itemFlag,
+  .regionMR {
+    background-position: 0 -1391px;
+  }
+
+  .countryMG .itemFlag,
+  .regionMG {
+    background-position: 0 -1402px;
+  }
+
+  .countryMO .itemFlag,
+  .regionMO {
+    background-position: 0 -1413px;
+  }
+
+  .countryMK .itemFlag,
+  .regionMK {
+    background-position: 0 -1424px;
+  }
+
+  .countryMW .itemFlag,
+  .regionMW {
+    background-position: 0 -1435px;
+  }
+
+  .countryMY .itemFlag,
+  .regionMY {
+    background-position: 0 -1446px;
+  }
+
+  .countryML .itemFlag,
+  .regionML {
+    background-position: 0 -1457px;
+  }
+
+  .countryMV .itemFlag,
+  .regionMV {
+    background-position: 0 -1468px;
+  }
+
+  .countryMT .itemFlag,
+  .regionMT {
+    background-position: 0 -1479px;
+  }
+
+  .countryMA .itemFlag,
+  .regionMA {
+    background-position: 0 -1490px;
+  }
+
+  .countryMX .itemFlag,
+  .regionMX {
+    background-position: 0 -1501px;
+  }
+
+  .countryMZ .itemFlag,
+  .regionMZ {
+    background-position: 0 -1512px;
+  }
+
+  .countryMC .itemFlag,
+  .regionMC {
+    background-position: 0 -1523px;
+  }
+
+  .countryNA .itemFlag,
+  .regionNA {
+    background-position: 0 -1534px;
+  }
+
+  .countryNR .itemFlag,
+  .regionNR {
+    background-position: 0 -1545px;
+  }
+
+  .countryNP .itemFlag,
+  .regionNP {
+    background-position: 0 -1556px;
+  }
+
+  .countryNE .itemFlag,
+  .regionNE {
+    background-position: 0 -1567px;
+  }
+
+  .countryNG .itemFlag,
+  .regionNG {
+    background-position: 0 -1578px;
+  }
+
+  .countryNI .itemFlag,
+  .regionNI {
+    background-position: 0 -1589px;
+  }
+
+  .countryNZ .itemFlag,
+  .regionNZ {
+    background-position: 0 -1600px;
+  }
+
+  .countryAE .itemFlag,
+  .regionAE {
+    background-position: 0 -1611px;
+  }
+
+  .countryOM .itemFlag,
+  .regionOM {
+    background-position: 0 -1622px;
+  }
+
+  .countryPK .itemFlag,
+  .regionPK {
+    background-position: 0 -1633px;
+  }
+
+  .countryPS .itemFlag,
+  .regionPS {
+    background-position: 0 -1644px;
+  }
+
+  .countryPG .itemFlag,
+  .regionPG {
+    background-position: 0 -1655px;
+  }
+
+  .countryPY .itemFlag,
+  .regionPY {
+    background-position: 0 -1666px;
+  }
+
+  .countryPE .itemFlag,
+  .regionPE {
+    background-position: 0 -1677px;
+  }
+
+  .countryPR .itemFlag,
+  .regionPR {
+    background-position: 0 -1688px;
+  }
+
+  .countryRE .itemFlag,
+  .regionRE {
+    background-position: 0 -1699px;
+  }
+
+  .countryRW .itemFlag,
+  .regionRW {
+    background-position: 0 -1710px;
+  }
+
+  .countrySV .itemFlag,
+  .regionSV {
+    background-position: 0 -1721px;
+  }
+
+  .countryWS .itemFlag,
+  .regionWS {
+    background-position: 0 -1732px;
+  }
+
+  .countrySM .itemFlag,
+  .regionSM {
+    background-position: 0 -1743px;
+  }
+
+  .countryST .itemFlag,
+  .regionST {
+    background-position: 0 -1754px;
+  }
+
+  .countrySA .itemFlag,
+  .regionSA {
+    background-position: 0 -1765px;
+  }
+
+  .countrySZ .itemFlag,
+  .regionSZ {
+    background-position: 0 -1776px;
+  }
+
+  .countrySC .itemFlag,
+  .regionSC {
+    background-position: 0 -1787px;
+  }
+
+  .countrySN .itemFlag,
+  .regionSN {
+    background-position: 0 -1798px;
+  }
+
+  .countryKN .itemFlag,
+  .regionKN {
+    background-position: 0 -1809px;
+  }
+
+  .countryVC .itemFlag,
+  .regionVC {
+    background-position: 0 -1820px;
+  }
+
+  .countryLC .itemFlag,
+  .regionLC {
+    background-position: 0 -1831px;
+  }
+
+  .countryRS .itemFlag,
+  .regionRS {
+    background-position: 0 -1842px;
+  }
+
+  .countrySG .itemFlag,
+  .regionSG {
+    background-position: 0 -1853px;
+  }
+
+  .countrySY .itemFlag,
+  .regionSY {
+    background-position: 0 -1864px;
+  }
+
+  .countrySI .itemFlag,
+  .regionSI {
+    background-position: 0 -1875px;
+  }
+
+  .countrySO .itemFlag,
+  .regionSO {
+    background-position: 0 -1886px;
+  }
+
+  .countrySD .itemFlag,
+  .regionSD {
+    background-position: 0 -1897px;
+  }
+
+  .countrySR .itemFlag,
+  .regionSR {
+    background-position: 0 -1908px;
+  }
+
+  .countrySL .itemFlag,
+  .regionSL {
+    background-position: 0 -1919px;
+  }
+
+  .countryPF .itemFlag,
+  .regionPF {
+    background-position: 0 -1930px;
+  }
+
+  .countryTW .itemFlag,
+  .regionTW {
+    background-position: 0 -1941px;
+  }
+
+  .countryTZ .itemFlag,
+  .regionTZ {
+    background-position: 0 -1952px;
+  }
+
+  .countryTG .itemFlag,
+  .regionTG {
+    background-position: 0 -1963px;
+  }
+
+  .countryTO .itemFlag,
+  .regionTO {
+    background-position: 0 -1974px;
+  }
+
+  .countryTT .itemFlag,
+  .regionTT {
+    background-position: 0 -1985px;
+  }
+
+  .countryTV .itemFlag,
+  .regionTV {
+    background-position: 0 -1996px;
+  }
+
+  .countryTN .itemFlag,
+  .regionTN {
+    background-position: 0 -2007px;
+  }
+
+  .countryTC .itemFlag,
+  .regionTC {
+    background-position: 0 -2018px;
+  }
+
+  .countryUG .itemFlag,
+  .regionUG {
+    background-position: 0 -2029px;
+  }
+
+  .countryUY .itemFlag,
+  .regionUY {
+    background-position: 0 -2040px;
+  }
+
+  .countryFJ .itemFlag,
+  .regionFJ {
+    background-position: 0 -2051px;
+  }
+
+  .countryPH .itemFlag,
+  .regionPH {
+    background-position: 0 -2062px;
+  }
+
+  .countryFI .itemFlag,
+  .regionFI {
+    background-position: 0 -2073px;
+  }
+
+  .countryGF .itemFlag,
+  .regionGF {
+    background-position: 0 -2084px;
+  }
+
+  .countryHR .itemFlag,
+  .regionHR {
+    background-position: 0 -2095px;
+  }
+
+  .countryCF .itemFlag,
+  .regionCF {
+    background-position: 0 -2106px;
+  }
+
+  .countryTD .itemFlag,
+  .regionTD {
+    background-position: 0 -2117px;
+  }
+
+  .countryME .itemFlag,
+  .regionME {
+    background-position: 0 -2128px;
+  }
+
+  .countryCL .itemFlag,
+  .regionCL {
+    background-position: 0 -2139px;
+  }
+
+  .countryCH .itemFlag,
+  .regionCH {
+    background-position: 0 -2150px;
+  }
+
+  .countrySE .itemFlag,
+  .regionSE {
+    background-position: 0 -2161px;
+  }
+
+  .countryLK .itemFlag,
+  .regionLK {
+    background-position: 0 -2172px;
+  }
+
+  .countryEC .itemFlag,
+  .regionEC {
+    background-position: 0 -2183px;
+  }
+
+  .countryGQ .itemFlag,
+  .regionGQ {
+    background-position: 0 -2194px;
+  }
+
+  .countryER .itemFlag,
+  .regionER {
+    background-position: 0 -2205px;
+  }
+
+  .countryET .itemFlag,
+  .regionET {
+    background-position: 0 -2216px;
+  }
+
+  .countrySS .itemFlag,
+  .regionSS {
+    background-position: 0 -2227px;
+  }
+
+  .countryJM .itemFlag,
+  .regionJM {
+    background-position: 0 -2238px;
+  }
+
+  .countryMQ .itemFlag,
+  .regionMQ {
+    background-image: url('/default/img/martinique.svg');
+  }
+}
+
+@mixin rounded-flags-mixin () {
+  background-image: url('/default/img/flags-sprite.png');
+  background-size: 2438.1%;
+
+  &_1 {
+    background-position: 37.8819% 9.77597%;
+  }
+
+  &_2 {
+    background-position: 42.5662% 9.77597%;
+  }
+
+  &_3 {
+    background-position: 51.9348% 51.93483%;
+  }
+
+  &_4 {
+    background-position: 47.2505% 9.77597%;
+  }
+
+  &_5 {
+    background-position: 51.9348% 9.77597%;
+  }
+
+  &_6 {
+    background-position: 56.6191% 9.77597%;
+  }
+
+  &_7 {
+    background-position: 61.3035% 9.77597%;
+  }
+
+  &_8 {
+    background-position: 84.7251% 47.25051%;
+  }
+
+  &_9 {
+    background-position: 70.6721% 9.77597%;
+  }
+
+
+  &_10 {
+    background-position: 75.3564% 9.77597%;
+  }
+
+
+  &_11 {
+    background-position: 80.0407% 9.77597%;
+  }
+
+
+  &_12 {
+    background-position: 84.7251% 9.77597%;
+  }
+
+
+  &_13 {
+    background-position: 89.4094% 9.77597%;
+  }
+
+
+  &_14 {
+    background-position: 94.0937% 9.77597%;
+  }
+
+
+  &_15 {
+    background-position: 98.778% 9.77597%;
+  }
+
+
+  &_16 {
+    background-position: 0.407332% 14.46029%;
+  }
+
+
+  &_17 {
+    background-position: 5.09165% 14.46029%;
+  }
+
+
+  &_18 {
+    background-position: 9.77597% 14.46029%;
+  }
+
+
+  &_19 {
+    background-position: 14.4603% 14.46029%;
+  }
+
+
+  &_20 {
+    background-position: 19.1446% 14.46029%;
+  }
+
+
+  &_21 {
+    background-position: 23.8289% 14.46029%;
+  }
+
+
+  &_22 {
+    background-position: 28.5132% 14.46029%;
+  }
+
+
+  &_23 {
+    background-position: 33.1976% 14.46029%;
+  }
+
+
+  &_24 {
+    background-position: 37.8819% 14.46029%;
+  }
+
+
+  &_25 {
+    background-position: 42.5662% 14.46029%;
+  }
+
+
+  &_26 {
+    background-position: 47.2505% 14.46029%;
+  }
+
+
+  &_27 {
+    background-position: 51.9348% 14.46029%;
+  }
+
+
+  &_28 {
+    background-position: 56.6191% 14.46029%;
+  }
+
+
+  &_29 {
+    background-position: 61.3035% 14.46029%;
+  }
+
+
+  &_30 {
+    background-position: 65.9878% 14.46029%;
+  }
+
+
+  &_31 {
+    background-position: 70.6721% 14.46029%;
+  }
+
+
+  &_32 {
+    background-position: 75.3564% 14.46029%;
+  }
+
+
+  &_33 {
+    background-position: 80.0407% 14.46029%;
+  }
+
+
+  &_34 {
+    background-position: 84.7251% 14.46029%;
+  }
+
+
+  &_35 {
+    background-position: 89.4094% 14.46029%;
+  }
+
+
+  &_36 {
+    background-position: 94.0937% 14.46029%;
+  }
+
+
+  &_37 {
+    background-position: 98.778% 14.46029%;
+  }
+
+  &_38 {
+    background-position: 0.407332% 19.1446%;
+  }
+
+  &_39 {
+    background-position: 9.91% 19.1446%;
+  }
+
+  &_39_2 {
+    background-position: 9.77597% 19.1446%;
+  }
+
+  &_40 {
+    background-position: 14.4603% 19.1446%;
+  }
+
+  &_41 {
+    background-position: 19.1446% 19.1446%;
+  }
+
+  &_42 {
+    background-position: 23.8289% 19.1446%;
+  }
+
+  &_43 {
+    background-position: 28.5132% 19.1446%;
+  }
+
+  &_44 {
+    background-position: 33.1976% 19.1446%;
+  }
+
+  &_45 {
+    background-position: 37.8819% 19.1446%;
+  }
+
+  &_46 {
+    background-position: 42.5662% 19.1446%;
+  }
+
+  &_47 {
+    background-position: 47.2505% 19.1446%;
+  }
+
+  &_48 {
+    background-position: 51.9348% 19.1446%;
+  }
+
+  &_49 {
+    background-position: 56.6191% 19.1446%;
+  }
+
+  &_50 {
+    background-position: 61.3035% 19.1446%;
+  }
+
+  &_51 {
+    background-position: 65.9878% 19.1446%;
+  }
+
+  &_52 {
+    background-position: 70.6721% 19.1446%;
+  }
+
+  &_53 {
+    background-position: 75.3564% 19.1446%;
+  }
+
+  &_54 {
+    background-position: 80.0407% 19.1446%;
+  }
+
+  &_55 {
+    background-position: 84.7251% 19.1446%;
+  }
+
+  &_56 {
+    background-position: 89.4094% 19.1446%;
+  }
+
+  &_57 {
+    background-position: 94.0937% 19.1446%;
+  }
+
+  &_58 {
+    background-position: 98.778% 19.1446%;
+  }
+
+  &_59 {
+    background-position: 0.407332% 23.82892%;
+  }
+
+  &_60 {
+    background-position: 5.09165% 23.82892%;
+  }
+
+  &_61 {
+    background-position: 9.77597% 23.82892%;
+  }
+
+  &_62 {
+    background-position: 14.4603% 23.82892%;
+  }
+
+  &_63 {
+    background-position: 19.1446% 23.82892%;
+  }
+
+  &_64 {
+    background-position: 23.8289% 23.82892%;
+  }
+
+  &_65 {
+    background-position: 28.5132% 23.82892%;
+  }
+
+  &_66 {
+    background-position: 33.1976% 23.82892%;
+  }
+
+  &_67 {
+    background-position: 37.8819% 23.82892%;
+  }
+
+  &_68 {
+    background-position: 0.407332% 0.407332%;
+  }
+
+  &_69 {
+    background-position: 47.2505% 23.82892%;
+  }
+
+  &_70 {
+    background-position: 51.9348% 23.82892%;
+  }
+
+  &_71 {
+    background-position: 56.6191% 23.82892%;
+  }
+
+  &_72 {
+    background-position: 61.3035% 23.82892%;
+  }
+
+  &_73 {
+    background-position: 65.9878% 23.82892%;
+  }
+
+  &_74 {
+    background-position: 70.6721% 23.82892%;
+  }
+
+  &_75 {
+    background-position: 75.3564% 23.82892%;
+  }
+
+  &_76 {
+    background-position: 80.0407% 23.82892%;
+  }
+
+  &_77 {
+    background-position: 84.7251% 23.82892%;
+  }
+
+  &_78 {
+    background-position: 89.4094% 23.82892%;
+  }
+
+  &_79 {
+    background-position: 94.0937% 23.82892%;
+  }
+
+  &_80 {
+    background-position: 98.778% 23.82892%;
+  }
+
+  &_81 {
+    background-position: 0.407332% 28.51324%;
+  }
+
+  &_82 {
+    background-position: 5.09165% 28.51324%;
+  }
+
+  &_83 {
+    background-position: 9.77597% 28.51324%;
+  }
+
+  &_84 {
+    background-position: 14.4603% 28.51324%;
+  }
+
+  &_85 {
+    background-position: 19.1446% 28.51324%;
+  }
+
+  &_86 {
+    background-position: 23.8289% 28.51324%;
+  }
+
+  &_87 {
+    background-position: 28.5132% 28.51324%;
+  }
+
+  &_88 {
+    background-position: 33.1976% 28.51324%;
+  }
+
+  &_89 {
+    background-position: 37.8819% 28.51324%;
+  }
+
+  &_90 {
+    background-position: 42.5662% 28.51324%;
+  }
+
+  &_91 {
+    background-position: 47.2505% 28.51324%;
+  }
+
+  &_92 {
+    background-position: 51.9348% 28.51324%;
+  }
+
+  &_93 {
+    background-position: 56.6191% 28.51324%;
+  }
+
+  &_94 {
+    background-position: 28.5132% 51.93483%;
+  }
+
+  &_95 {
+    background-position: 98.8035% 47.25051%;
+  }
+
+  &_96 {
+    background-position: 65.9878% 28.51324%;
+  }
+
+  &_97 {
+    background-position: 70.6721% 28.51324%;
+  }
+
+  &_98 {
+    background-position: 75.3564% 28.51324%;
+  }
+
+  &_99 {
+    background-position: 80.0407% 28.51324%;
+  }
+
+  &_100 {
+    background-position: 84.7251% 28.51324%;
+  }
+
+  &_101 {
+    background-position: 89.4094% 28.51324%;
+  }
+
+  &_102 {
+    background-position: 94.0937% 28.51324%;
+  }
+
+  &_103 {
+    background-position: 98.778% 28.51324%;
+  }
+
+  &_104 {
+    background-position: 0.407332% 33.19756%;
+  }
+
+  &_105 {
+    background-position: 5.09165% 33.19756%;
+  }
+
+  &_106 {
+    background-position: 9.77597% 33.19756%;
+  }
+
+  &_107 {
+    background-position: 14.4603% 33.19756%;
+  }
+
+  &_108 {
+    background-position: 19.1446% 33.19756%;
+  }
+
+  &_109 {
+    background-position: 23.8289% 33.19756%;
+  }
+
+  &_110 {
+    background-position: 28.5132% 33.19756%;
+  }
+
+  &_111 {
+    background-position: 33.1976% 33.19756%;
+  }
+
+  &_112 {
+    background-position: 37.8819% 33.19756%;
+  }
+
+  &_113 {
+    background-position: 42.5662% 33.19756%;
+  }
+
+  &_114 {
+    background-position: 47.2505% 33.19756%;
+  }
+
+  &_115 {
+    background-position: 51.9348% 33.19756%;
+  }
+
+  &_116 {
+    background-position: 56.6191% 33.19756%;
+  }
+
+  &_117 {
+    background-position: 61.3035% 33.19756%;
+  }
+
+  &_118 {
+    background-position: 65.9878% 33.19756%;
+  }
+
+  &_119 {
+    background-position: 70.6721% 33.19756%;
+  }
+
+  &_120 {
+    background-position: 75.3564% 33.19756%;
+  }
+
+  &_121 {
+    background-position: 80.0407% 33.19756%;
+  }
+
+  &_122 {
+    background-position: 84.7251% 33.19756%;
+  }
+
+  &_123 {
+    background-position: 89.4094% 33.19756%;
+  }
+
+  &_124 {
+    background-position: 94.0937% 33.19756%;
+  }
+
+  &_125 {
+    background-position: 98.778% 33.19756%;
+  }
+
+  &_126 {
+    background-position: 0.407332% 37.88187%;
+  }
+
+  &_127 {
+    background-position: 5.09165% 37.88187%;
+  }
+
+  &_128 {
+    background-position: 9.77597% 37.88187%;
+  }
+
+  &_129 {
+    background-position: 14.4603% 37.88187%;
+  }
+
+  &_130 {
+    background-position: 19.1446% 37.88187%;
+  }
+
+  &_131 {
+    background-position: 23.8289% 37.88187%;
+  }
+
+  &_132 {
+    background-position: 28.5132% 37.88187%;
+  }
+
+  &_133 {
+    background-position: 33.1976% 37.88187%;
+  }
+
+  &_134 {
+    background-position: 37.8819% 37.88187%;
+  }
+
+  &_135 {
+    background-position: 42.5662% 37.88187%;
+  }
+
+  &_136 {
+    background-position: 47.2505% 37.88187%;
+  }
+
+  &_137 {
+    background-position: 51.9348% 37.88187%;
+  }
+
+  &_138 {
+    background-position: 56.6191% 37.88187%;
+  }
+
+  &_139 {
+    background-position: 61.3035% 37.88187%;
+  }
+
+  &_140 {
+    background-position: 65.9878% 37.88187%;
+  }
+
+  &_141 {
+    background-position: 70.6721% 37.88187%;
+  }
+
+  &_142 {
+    background-position: 75.3564% 37.88187%;
+  }
+
+  &_143 {
+    background-position: 80.0407% 37.88187%;
+  }
+
+  &_144 {
+    background-position: 84.7251% 37.88187%;
+  }
+
+  &_145 {
+    background-position: 89.4094% 37.88187%;
+  }
+
+  &_146 {
+    background-position: 94.0937% 37.88187%;
+  }
+
+  &_147 {
+    background-position: 98.778% 37.88187%;
+  }
+
+  &_148 {
+    background-position: 0.407332% 42.56619%;
+  }
+
+  &_149 {
+    background-position: 5.09165% 42.56619%;
+  }
+
+  &_150 {
+    background-position: 9.77597% 51.93483%;
+  }
+
+  &_151 {
+    background-position: 9.77597% 42.56619%;
+  }
+
+  &_152 {
+    background-position: 14.4603% 42.56619%;
+  }
+
+  &_153 {
+    background-position: 19.1446% 42.56619%;
+  }
+
+  &_154 {
+    background-position: 23.8289% 42.56619%;
+  }
+
+  &_155 {
+    background-position: 28.5132% 42.56619%;
+  }
+
+  &_156 {
+    background-position: 33.1976% 42.56619%;
+  }
+
+  &_157 {
+    background-position: 37.8819% 42.56619%;
+  }
+
+  &_158 {
+    background-position: 42.5662% 42.56619%;
+  }
+
+  &_159 {
+    background-position: 47.2505% 42.56619%;
+  }
+
+  &_160 {
+    background-position: 51.9348% 42.56619%;
+  }
+
+  &_161 {
+    background-position: 56.6191% 42.56619%;
+  }
+
+  &_162 {
+    background-position: 61.3035% 42.56619%;
+  }
+
+  &_163 {
+    background-position: 65.9878% 42.56619%;
+  }
+
+  &_164 {
+    background-position: 70.6721% 42.56619%;
+  }
+
+  &_165 {
+    background-position: 75.3564% 42.56619%;
+  }
+
+  &_166 {
+    background-position: 80.0407% 42.56619%;
+  }
+
+  &_167 {
+    background-position: 84.7251% 42.56619%;
+  }
+
+  &_168 {
+    background-position: 89.4094% 42.56619%;
+  }
+
+  &_169 {
+    background-position: 94.0937% 42.56619%;
+  }
+
+  &_170 {
+    background-position: 98.778% 42.56619%;
+  }
+
+  &_171 {
+    background-position: 0.407332% 47.25051%;
+  }
+
+  &_172 {
+    background-position: 5.09165% 47.25051%;
+  }
+
+  &_173 {
+    background-position: 9.77597% 47.25051%;
+  }
+
+  &_174 {
+    background-position: 14.4603% 47.25051%;
+  }
+
+  &_175 {
+    background-position: 19.1446% 47.25051%;
+  }
+
+  &_176 {
+    background-position: 23.8289% 47.25051%;
+  }
+
+  &_177 {
+    background-position: 28.5132% 47.25051%;
+  }
+
+  &_178 {
+    background-position: 33.1976% 47.25051%;
+  }
+
+  &_179 {
+    background-position: 89.4094% 47.25051%;
+  }
+
+  &_180 {
+    background-position: 42.5662% 47.25051%;
+  }
+
+  &_181 {
+    background-position: 47.2505% 47.25051%;
+  }
+
+  &_182 {
+    background-position: 51.9348% 47.25051%;
+  }
+
+  &_183 {
+    background-position: 56.6191% 47.25051%;
+  }
+
+  &_184 {
+    background-position: 61.3035% 47.25051%;
+  }
+
+  &_185 {
+    background-position: 65.9878% 47.25051%;
+  }
+
+  &_186 {
+    background-position: 70.6721% 47.25051%;
+  }
+
+  &_187 {
+    background-position: 75.3564% 47.25051%;
+  }
+
+  &_188 {
+    background-position: 80.0407% 47.25051%;
+  }
+
+
+  &_189 {
+    background-position: 5.09165% 0.407332%;
+  }
+
+  &_190 {
+    background-position: 42.5662% 23.82892%;
+  }
+
+  &_191 {
+    background-position: 9.77597% 0.407332%;
+  }
+
+  &_192 {
+    background-position: 14.4603% 0.407332%;
+  }
+
+  &_193 {
+    background-position: 19.1446% 0.407332%;
+  }
+
+  &_194 {
+    background-position: 23.8289% 0.407332%;
+  }
+
+  &_195 {
+    background-position: 28.5132% 0.407332%;
+  }
+
+  &_196 {
+    background-position: 33.1976% 0.407332%;
+  }
+
+  &_197 {
+    background-position: 37.8819% 0.407332%;
+  }
+
+  &_198 {
+    background-position: 42.5662% 0.407332%;
+  }
+
+  &_199 {
+    background-position: 47.2505% 0.407332%;
+  }
+
+  &_200 {
+    background-position: 51.9348% 0.407332%;
+  }
+
+  &_201 {
+    background-position: 56.6191% 0.407332%;
+  }
+
+  &_202 {
+    background-position: 61.3035% 0.407332%;
+  }
+
+  &_203 {
+    background-position: 65.9878% 0.407332%;
+  }
+
+  &_204 {
+    background-position: 70.6721% 0.407332%;
+  }
+
+  &_205 {
+    background-position: 75.3564% 0.407332%;
+  }
+
+  &_206 {
+    background-position: 80.0407% 0.407332%;
+  }
+
+  &_207 {
+    background-position: 84.7251% 0.407332%;
+  }
+
+  &_208 {
+    background-position: 89.4094% 0.407332%;
+  }
+
+  &_209 {
+    background-position: 94.0937% 0.407332%;
+  }
+
+  &_210 {
+    background-position: 98.778% 0.407332%;
+  }
+
+  &_211 {
+    background-position: 0.407332% 5.09165%;
+  }
+
+  &_212 {
+    background-position: 5.09165% 5.09165%;
+  }
+
+  &_213 {
+    background-position: 9.77597% 5.09165%;
+  }
+
+  &_214 {
+    background-position: 14.4603% 5.09165%;
+  }
+
+  &_215 {
+    background-position: 19.1446% 5.09165%;
+  }
+
+  &_216 {
+    background-position: 23.8289% 5.09165%;
+  }
+
+  &_217 {
+    background-position: 28.5132% 5.09165%;
+  }
+
+  &_218 {
+    background-position: 33.1976% 5.09165%;
+  }
+
+  &_219 {
+    background-position: 37.8819% 5.09165%;
+  }
+
+  &_222 {
+    background-position: 42.5662% 5.09165%;
+  }
+
+  &_223 {
+    background-position: 47.2505% 5.09165%;
+  }
+
+  &_224 {
+    background-position: 51.9348% 5.09165%;
+  }
+
+  &_225 {
+    background-position: 23.8289% 51.93483%;
+  }
+
+  &_226 {
+    background-position: 56.6191% 5.09165%;
+  }
+
+  &_227 {
+    background-position: 61.3035% 5.09165%;
+  }
+
+  &_228 {
+    background-position: 65.9878% 5.09165%;
+  }
+
+  &_229 {
+    background-position: 19.1446% 51.93483%;
+  }
+
+  &_230 {
+    background-position: 70.6721% 5.09165%;
+  }
+
+  &_231 {
+    background-position: 75.3564% 5.09165%;
+  }
+
+  &_232 {
+    background-position: 80.0407% 5.09165%;
+  }
+
+  &_233 {
+    background-position: 84.7251% 5.09165%;
+  }
+
+  &_234 {
+    background-position: 42.65% 51.91756%;
+  }
+
+  &_236 {
+    background-position: 9.91% 19.1446%;
+  }
+
+  &_237 {
+    background-position: 94.0937% 5.09165%;
+  }
+
+  &_238 {
+    background-position: 98.778% 5.09165%;
+  }
+
+  &_239 {
+    background-position: 0.407332% 9.77597%;
+  }
+
+  &_240 {
+    background-position: 5.09165% 9.77597%;
+  }
+
+  &_241 {
+    background-position: 9.77597% 9.77597%;
+  }
+
+  &_243 {
+    background-position: 94.2976% 47.03483%;
+  }
+
+  &_244 {
+    background-position: 51.9878% 0.47597%;
+  }
+
+  &_245 {
+    background-position: 65.9878% 51.93483%;
+  }
+
+  &_246 {
+    background-position: 42.49165% 51.91756%;
+  }
+
+  &_248 {
+    background-position: 98.778% 51.93483%;
+  }
+
+  &_259 {
+    background-position: 56.6191% 51.93483%;
+  }
+
+  &_263 {
+    background-position: 80.0407% 51.93483%;
+  }
+
+  &_265 {
+    background-position: 84.7251% 51.93483%;
+  }
+
+  &_276 {
+    background-position: 89.4094% 51.93483%;
+  }
+
+  &_277 {
+    background-position: 75.3564% 51.93483%;
+  }
+
+  &_278 {
+    background-position: 33.1976% 51.93483%;
+  }
+
+  &_279 {
+    background-position: 94.2976% 47.03483%;
+  }
+
+  &_280 {
+    background-position: 14.4603% 51.93483%;
+  }
+
+  &_281 {
+    background-position: 0.407332% 51.93483%;
+  }
+
+  &_282 {
+    background-position: 5.09165% 51.93483%;
+  }
+
+  &_284 {
+    background-position: 70.6721% 51.93483%;
+  }
+
+  &_285 {
+    background-position: 75.3564% 14.46029%;
+  }
+
+  &_286 {
+    background-position: 94.0937% 5.09165%;
+  }
+
+  &_287 {
+    background-position: 94.0937% 51.93483%;
+  }
+
+  &_288 {
+    background-position: 61.3035% 51.93483%;
+  }
+}
+
+
+/// Миксин добавляющий атрибут
+@mixin append-attr($x) {
+  $sel: &;
+  $collector: ();
+
+  @for $i from 1 through length($sel) {
+    $s: nth($sel, $i);
+    $last: nth($s, -1);
+    @if str-slice($last, -1) == "]" {
+      $offset: -1;
+      $current-x: $x;
+
+      @if str-slice($last, -2) == '"]' {
+        $offset: -2;
+      } @else {
+        $current-x: '="' + $x + '"';
+      }
+      $last: str-slice($last, 1, $offset - 1) + $current-x + str-slice($last, $offset);
+      $collector: append($collector, set-nth($s, -1, $last), comma);
+    } @else {
+      $collector: append($collector, selector-append($s, $x), comma);
+    }
+  }
+
+  @at-root #{$collector} {
+    @content;
+  }
+}
+
+// Миксин, рассчитывающий параменты ширины, высоты и размера фона
+// дле элентов, которые берут фоновое изображение из спрайта
+// $elWidth - ширина элемента в px
+// $elHeigth - высота элемента в px
+// $font - базовый размер шрифта в px
+// $spriteW - ширина спрайта в px
+// $spriteH - высота спрайта в px
+@mixin setRulesForSprite($elWidth, $elHeigth, $font, $spriteW, $spriteH) {
+  width: em(strip-units($elWidth), $font);
+  height: em(strip-units($elHeigth), $font);
+  background-size: percentage($spriteW/strip-units($elWidth)) percentage($spriteH/strip-units($elHeigth));
+}
+
+@mixin safari() {
+  @media not all and (min-resolution:.001dpcm)
+  { @supports (-webkit-appearance:none) {
+    @content
+  }}
+}
+
+@mixin box($value, $radius: false) {
+  width: $value;
+  height: $value;
+
+  @if ($radius != false) {
+    border-radius: $radius;
+  }
+}
+
+@mixin flex($value: center) {
+  display: flex;
+
+  align-items: center;
+  justify-content: $value;
+}
+
+@mixin size($width, $height: $width) {
+  width: $width;
+  height: $height;
+}

@@ -8,7 +8,7 @@ body {
   position: fixed;
   width: 100%;
   background-color: hsla(240, 29%, 9%, 0.9);
-  padding: 25px 0;
+  padding: em(25 0, $fz);
 }
 
 .header-content {
@@ -39,7 +39,7 @@ body {
   &__link {
     color: #fff;
     text-transform: uppercase;
-    padding: 0 25px;
+    padding: em(0 25, $fz);
     text-decoration: none;
 
     &:hover {
@@ -102,7 +102,7 @@ body {
 
   &__item {
     box-sizing: border-box;
-    width: 100px;
+    width: em(100, $fz);
     height: 100px;
     background-color: #3e9cdc;
     border: 5px #286690 solid;

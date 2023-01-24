@@ -1,0 +1,19 @@
+///Функция возвращающая число крастное 8
+///ept - 8-point
+///@param {Number} - $value;
+///@param {Number, String} - $units;
+@function ept($value, $units: px, $context: $base-font-size) {
+  @if ($value == 0) {
+    @return $multiply/2 * 1#{$units};
+  } @else if((unitless($value) and type_of($value) == 'number') and $units != 'em') {
+    @return $value * $multiply * 1#{$units};
+  } @else if type_of($value) == 'number' and unit($value) == 'px' {
+    @return $value * $multiply;
+  } @else if type_of($value) == 'string' {
+    @warn 'only numbers allowed';
+  } @else {
+    @return em($value * $multiply, $context);
+  }
+}
+
+

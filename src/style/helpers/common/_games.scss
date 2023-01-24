@@ -1,0 +1,36 @@
+@function em($object, $font: 16) {
+  @return #{$object/$font}em;
+}
+@function rem($object, $font: 10) {
+  @return #{$object/$font}rem;
+}
+@mixin o($orientation) {
+  @if $orientation == p OR $orientation == portrait {
+    @media (orientation: portrait) {
+      @content;
+    }
+  } @else if $orientation == l OR $orientation == landscape {
+    @media (orientation: landscape) {
+      @content;
+    }
+  } @else {
+    @warn "No such orientation found"
+  }
+}
+
+@mixin rendering {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+@mixin cover {
+  background-position: 50% 50%;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+@mixin placeholder {
+  &::-webkit-input-placeholder {@content};
+  &:-moz-placeholder           {@content};
+  &::-moz-placeholder          {@content};
+  &:-ms-input-placeholder      {@content};
+}

@@ -1,0 +1,24 @@
+@import "settings";
+@import "functions";
+
+@for $i from 0 through $size {
+  @each $rule, $short in $rules {
+    @each $dir, $dir-short in $direction {
+      .u-#{$prefix}-#{$short}#{$dir-short}-#{$i} {
+        @if ($dir == 'vertical') {
+          #{$rule}-top: ept($i) !important;
+          #{$rule}-bottom: ept($i) !important;
+        } @else if ($dir == 'horizontal') {
+          #{$rule}-#{dir()}: ept($i) !important;
+          #{$rule}-#{dir(right)}: ept($i) !important;
+        } @else {
+          $dir : if($dir == 'left' or $dir == 'right', dir($dir), $dir);
+          #{$rule}-#{$dir}: ept($i) !important;
+        }
+      }
+    }
+    .u-#{$prefix}-#{$short}-#{$i} {
+      #{$rule} : ept($i) !important;
+    }
+  }
+}

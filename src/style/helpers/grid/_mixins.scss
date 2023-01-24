@@ -1,0 +1,116 @@
+@import "variables";
+
+@mixin make-grid($size: $grid-default-size, $margin: $grid-default-margin, $max-width: $grid-default-max-width) {
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: $margin;
+  padding: var(--#{$grid-scope-class}-size, $margin);
+
+  @if $max-width {
+    max-width: $max-width;
+  }
+
+}
+
+@mixin make-grid-cell-span_($size: $grid-default-size, $span: $grid-default-span, $gutter: $grid-default-gutter) {
+  //@if not map-has-key($mdc-layout-grid-columns, $size) {
+  //  @error "Invalid style specified! Choose one of #{map-keys($mdc-layout-grid-columns)}";
+  //}
+
+  $percent: percentage($span / $size);
+
+  @if $percent > 100% {
+    $percent: 100%;
+  }
+
+  width: calc(#{$percent} - #{$gutter});
+  width: calc(#{$percent} - var(--#{$grid-scope-class}-grid-gutter-#{$size}, #{$gutter}));
+
+  //@supports (display: grid) {
+  //  width: auto;
+  //  grid-column-end: span min($span, $size);
+  //}
+}
+
+@mixin make-grid-inner($size: $grid-default-size, $margin: $grid-default-gutter, $gutter: $grid-default-gutter) {
+  //@if not map-has-key($mdc-layout-grid-columns, $size) {
+  //  @error "Invalid style specified! Choose one of #{map-keys($mdc-layout-grid-columns)}";
+  //}
+
+  display: flex;
+  flex-flow: row wrap;
+  align-items: stretch;
+  margin: -$gutter / 2;
+  margin: calc(var(--#{$grid-scope-class}-gutter-#{$size}, #{$gutter}) / 2 * -1);
+
+  //@supports (display: grid) {
+  //  display: grid;
+  //  margin: 0;
+  //  grid-gap: $gutter;
+  //  grid-gap: var(--#{$grid-scope-class}-gutter-#{$size}, $gutter);
+  //  grid-template-columns: repeat($size, minmax(0, 1fr));
+  //}
+}
+
+@mixin make-grid-cell($size: $grid-default-size, $default-span: $grid-default-span, $gutter: $grid-default-gutter) {
+  //@if not map-has-key($mdc-layout-grid-columns, $size) {
+  //  @error "Invalid style specified! Choose one of #{map-keys($mdc-layout-grid-columns)}";
+  //}
+
+  @include make-grid-cell-span_($size, $default-span, $gutter);
+
+  box-sizing: border-box;
+  margin: $gutter / 2;
+  margin: calc(var(--#{$grid-scope-class}-gutter-#{$size}, #{$gutter}) / 2);
+
+  //@supports (display: grid) {
+  //  margin: 0;
+  //}
+}
+
+@mixin set-grid-cell-order($order) {
+  order: $order;
+}
+
+@mixin set-grid-cell-align($position) {
+  @if $position == "top" {
+    align-self: flex-start;
+
+    @supports (display: grid) {
+      align-self: start;
+    }
+  }
+
+  @if $position == "middle" {
+    align-self: center;
+  }
+
+  @if $position == "bottom" {
+    align-self: flex-end;
+
+    @supports (display: grid) {
+      align-self: end;
+    }
+  }
+
+  @if $position == "stretch" {
+    align-self: stretch;
+  }
+}
+
+@mixin set-grid-fixed-column-width($size: $grid-default-size, $margin: $grid-default-margin, $gutter: $grid-default-gutter, $column-width: $grid-default-column-width) {
+  //@if not map-has-key($mdc-layout-grid-columns, $size) {
+  //  @error "Invalid style specified! Choose one of #{map-keys($mdc-layout-grid-columns)}";
+  //}
+
+  $columnCount: $size;
+  $gutter-number: $columnCount - 1;
+  $margin-number: 2;
+
+  width: $column-width * $columnCount + $gutter * $gutter-number + $margin * $margin-number;
+  width: calc(
+    var(--#{$grid-scope-class}-column-width-#{$size}, #{$column-width}) * #{$columnCount} +
+    var(--#{$grid-scope-class}-gutter-#{$size}, #{$gutter}) * #{$gutter-number} +
+    var(--#{$grid-scope-class}-margin-#{$size}, #{$margin}) * #{$margin-number}
+  );
+}

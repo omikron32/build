@@ -1,0 +1,42 @@
+/*
+ Миксин для rtl
+ Примеры:
+   @include dir((
+      margin-left: 20px
+      padding-right: 10px
+      margin: 10px 10px 10px 10px
+    )); //указание контекста
+ */
+@mixin dir($properties) {
+  $rules: ();
+  @each $property in map-keys($properties) {
+    @if (length(map_get($properties, $property)) == 4) {
+      $rules: map_get($properties, $property);
+      @if ($property == 'border-radius') {
+        #{$property} : nth-value($rules, if($is_rtl == 0, 1, 2)) nth-value($rules, if($is_rtl == 0, 2, 1)) nth-value($rules, if($is_rtl == 0, 3, 4)) nth-value($rules, if($is_rtl == 0, 4, 3));
+      }@else {
+        #{$property} : nth-value($rules, 1) nth-value($rules, if($is_rtl == 0, 2, 4)) nth-value($rules, 3) nth-value($rules, if($is_rtl != 0, 2, 4));
+      }
+    } @else {
+      @if (str_index($property, 'right') != null and str_index($property, 'right') > 0 == true) {
+        #{str-replace($property, 'right', dir(right))}: map_get($properties, $property);
+      } @else {
+        #{str-replace($property, 'left', dir())} : map_get($properties, $property);
+      }
+    }
+  }
+}
+
+@function to-bool($value) {
+  @if ($value == '' or $value == 0 or $value == ()) {
+    @return false
+  } @else {
+    @return true
+  }
+}
+
+@mixin dir-content {
+  @if to-bool($is_rtl) {
+    @content;
+  }
+}
