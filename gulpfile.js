@@ -60,7 +60,8 @@ gulp.task('svg-sprite', function () {
             mode: {
                 stack: {
                     sprite: "../sprite.svg"  //sprite file name
-                }
+                },
+                symbol: true
             },
         }))
         .pipe(gulp.dest('build/img'))
