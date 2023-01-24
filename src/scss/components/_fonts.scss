@@ -1,0 +1,20 @@
+////@include addFont('Montserrat', 'BlackItalic', 900, 'italic');
+////@include addFont('Montserrat', 'ExtraBoldItalic', 800 'italic');
+////@include addFont('Montserrat', 'BoldItalic', 700 'italic');
+////@include addFont('Montserrat', 'SemiBoldItalic', 600 'italic');
+////@include addFont('Montserrat', 'MediumItalic', 500 'italic');
+////@include addFont('Montserrat', 'Italic', 400, 'italic');
+//@include addFont('Montserrat', 'Black', 900,);
+//@include addFont('Montserrat', 'ExtraBold', 800);
+//@include addFont('Montserrat', 'Bold', 700);
+//@include addFont('Montserrat', 'SemiBold', 600);
+//@include addFont('Montserrat', 'Medium', 500);
+//@include addFont('Montserrat', 'Regular', 400);
+
+@font-face {
+  font-family: 'Montserrat';
+  font-weight: 400;
+  font-style: normal;
+  src: url('../../fonts/Montserrat-Regular.woff2') format('woff2');
+  font-display: swap;
+}

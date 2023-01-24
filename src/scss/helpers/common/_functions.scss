@@ -433,3 +433,17 @@
 
   @return $opposite-directions;
 }
+
+@mixin addFont($fontName, $fontType: 'Regular', $fontWeight: 400, $fontStyle: 'normal') {
+  @font-face {
+    font-family: $fontName;
+    src: url('../../fonts/' + $fontName + '/' + $fontName + '-' + $fontType + '.woff2') format('woff2');
+    font-weight: $fontWeight;
+    font-style: $fontStyle;
+    font-display: swap;
+  }
+}
+
+@mixin fontFamily($font) {
+  font-family: $font, 'Arial', 'San Francisco', sans-serif;
+}
