@@ -7,6 +7,7 @@ var gulp        = require('gulp');
     webp        = require('gulp-webp');
     imagemin    = require('gulp-imagemin');
     svgSprite   = require('gulp-svg-sprite');
+    favicons    = require('gulp-favicons');
 
 gulp.task('sass', function(){
     return gulp.src('src/scss/*.scss')
@@ -55,7 +56,7 @@ gulp.task('towebp', function () {
 });
 
 gulp.task('svg-sprite', function () {
-    return gulp.src('src/img/*.svg')
+    return gulp.src('src/img/icons-sprite/*.svg')
         .pipe(svgSprite({
             mode: {
                 stack: {
@@ -64,8 +65,36 @@ gulp.task('svg-sprite', function () {
                 symbol: true
             },
         }))
-        .pipe(gulp.dest('build/img'))
+        .pipe(gulp.dest('build/img/icons-sprite'))
         .pipe(browsersync.reload({ stream: true }))
+});
+
+var favicons = require('gulp-favicons');
+
+gulp.task('favicon', function () {
+    return gulp.src('src/img/logo.png')
+    .pipe(
+        favicons({
+            appName: 'Query',
+            appShortName: 'Qyery',
+            appDescription: 'This is my application',
+            developerName: '',
+            developerURL: '',
+            background: '#ffffff',
+            path: './',
+            url: '/',
+            display: 'standalone',
+            orientation: 'portrait',
+            scope: '/',
+            start_url: '/?homescreen=1',
+            version: 1.0,
+            logging: false,
+            html: 'build/index.html',
+            pipeHTML: true,
+            replace: true,
+        })
+    )
+    .pipe(gulp.dest('build/favicon'));
 });
 
 gulp.task('watch', function() {
@@ -74,7 +103,7 @@ gulp.task('watch', function() {
     gulp.watch('src/js/*.js', gulp.parallel('js'));
     gulp.watch('src/fonts/*.*', gulp.parallel('fonts'));
     gulp.watch('src/img/*.svg', gulp.parallel('svg-sprite'));
-    gulp.watch('src/img/*.{jpg,jpeg,png}', gulp.parallel('images'));
+    gulp.watch('src/img/*.{jpg,jpeg,png,svg}', gulp.parallel('images'));
     gulp.watch('src/img/*.{jpg,jpeg,png}', gulp.parallel('towebp'));
 });
 
@@ -91,4 +120,4 @@ exports.browsersync = browsersync;
 
 gulp.task('default', gulp.parallel('watch'));
 
-gulp.task('gulp-sync', gulp.parallel('sass', 'html', 'js', 'fonts', 'images', 'svg-sprite', 'browser-sync', 'watch'));
+gulp.task('gulp-sync', gulp.parallel('sass', 'html', 'js', 'fonts', 'images', 'favicon', 'svg-sprite', 'browser-sync', 'watch'));
